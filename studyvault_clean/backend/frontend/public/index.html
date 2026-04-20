@@ -597,7 +597,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 <div class="toast" id="toast"></div>
 
 <script>
-const API = ''; // Empty = same origin. Change to 'http://localhost:5000' for dev
+const API = '';
 let token = localStorage.getItem('sv_token');
 let currentUser = JSON.parse(localStorage.getItem('sv_user') || 'null');
 let pendingEmail = '';
@@ -626,7 +626,6 @@ function goPage(p) {
   document.getElementById('pg-' + p).classList.add('active');
   document.querySelectorAll('.auth-err').forEach(e => { e.classList.remove('show'); e.textContent = ''; });
 }
-
 function goLanding() { goPage(currentUser ? 'dashboard' : 'landing'); }
 
 // ─── NAV ───
@@ -641,10 +640,12 @@ function updateNav() {
 }
 
 // ─── EMAIL VALIDATION ───
+// FIXED: gmail.com added so admin can login
 function isAllowed(email) {
   if (!email || !email.includes('@')) return false;
   const d = email.split('@')[1].toLowerCase();
-  return ['edu.pk','ac.pk','edu','university.edu.pk'].some(x => d === x || d.endsWith('.' + x));
+  const allowed = ['edu.pk','ac.pk','edu','university.edu.pk','gmail.com','neduet.edu.pk','cloud.neduet.edu.pk'];
+  return allowed.some(x => d === x || d.endsWith('.' + x));
 }
 function checkDomain() {
   const e = document.getElementById('r-email').value;
@@ -672,12 +673,10 @@ async function doRegister() {
   const pass2 = document.getElementById('r-pass2').value;
   const err = document.getElementById('reg-err');
   const btn = document.getElementById('reg-btn');
-
   if (!name || !email || !department || !password) return showErr(err, 'Please fill in all fields.');
   if (!isAllowed(email)) return showErr(err, 'Only university email addresses allowed (.edu.pk, .ac.pk).');
   if (password.length < 8) return showErr(err, 'Password must be at least 8 characters.');
   if (password !== pass2) return showErr(err, 'Passwords do not match.');
-
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Sending OTP...';
   try {
@@ -685,7 +684,7 @@ async function doRegister() {
     pendingEmail = email;
     document.getElementById('otp-msg').textContent = `A 6-digit code was sent to ${email}. Check your inbox!`;
     goPage('otp');
-    showToast('OTP sent to your university email!');
+    showToast('OTP sent to your email!');
   } catch (e) {
     showErr(err, e.message);
   } finally {
@@ -857,7 +856,7 @@ function renderGrid(id, resources) {
           ${r.filePath ? '<span style="color:var(--green)">PDF ✓</span>' : '<span style="color:var(--muted)">No PDF</span>'}
         </div>
         <div style="display:flex;gap:6px;align-items:center">
-        <button class="dl-btn" onclick="event.stopPropagation();quickDl('${r._id}','${(r.title||'').replace(/'/g,"\\'")}')">Download</button>
+          <button class="dl-btn" onclick="event.stopPropagation();quickDl('${r._id}','${(r.title||'').replace(/'/g,"\\'")}')">Download</button>
           ${(currentUser && (r.uploaderEmail === currentUser.email || isAdminUser())) ? `<button style="background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-weight:600" onclick="event.stopPropagation();adminDeleteRes('${r._id}','${(r.title||'').replace(/'/g,"\\\\'")}')" title="Delete resource">🗑 Delete</button>` : ''}
         </div>
       </div>
@@ -878,7 +877,6 @@ async function openRes(id) {
     document.getElementById('modal-stars').innerHTML = [1,2,3,4,5].map(v =>
       `<button class="rstar" onclick="setRating(${v})" data-v="${v}">★</button>`).join('');
     renderComments();
-    // Show delete button in modal if user can delete
     const delBtn = document.getElementById('modal-del-btn');
     if (delBtn) {
       const canDel = currentUser && (activeRes.uploaderEmail === currentUser.email || isAdminUser());
@@ -893,7 +891,6 @@ function modalDeleteRes() {
   closeModal();
   confirmDel('resource', activeRes._id, 'Delete &quot;' + activeRes.title + '&quot;? This cannot be undone.');
 }
-
 function setRating(v) {
   selRating = v;
   document.querySelectorAll('.rstar').forEach(s => s.classList.toggle('sel', parseInt(s.dataset.v) <= v));
@@ -1023,7 +1020,6 @@ function showToast(msg, type) {
   t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-
 // ═══════════════════════════════════════════
 // FOLDER SYSTEM
 // ═══════════════════════════════════════════
@@ -1035,7 +1031,6 @@ const ADMIN_EMAIL_CLIENT = 'sindhuturkio20@gmail.com';
 
 function isAdminUser() { return currentUser && currentUser.email === ADMIN_EMAIL_CLIENT; }
 
-// ── Load and render folders ──
 async function loadFolders(search) {
   const gv = document.getElementById('folders-grid-view');
   const fv = document.getElementById('folder-files-view');
@@ -1067,7 +1062,7 @@ async function loadFolders(search) {
         <div class="folder-meta">${f.fileCount || 0} file${(f.fileCount||0) !== 1 ? 's' : ''}</div>
         <div class="folder-owner">by ${f.creatorName}</div>
         <div class="folder-actions">
-          <button class="fab fab-open" onclick="openFolder('${f._id}','${f.name.replace(/'/g,"\'")}','${f.code}')">Open</button>
+          <button class="fab fab-open" onclick="openFolder('${f._id}','${f.name.replace(/'/g,"\\'")}','${f.code}')">Open</button>
           ${canDel ? `<button class="fab fab-del" onclick="event.stopPropagation();confirmDel('folder','${f._id}','Delete folder &quot;${f.name}&quot; and ALL files inside it?')">Delete</button>` : ''}
         </div>
       </div>`;
@@ -1078,7 +1073,6 @@ async function loadFolders(search) {
   }
 }
 
-// ── Open a folder and show its files ──
 async function openFolder(fid, fname, fcode) {
   currentFolder = { _id: fid, name: fname, code: fcode };
   document.getElementById('folder-page-title').textContent = fname;
@@ -1139,7 +1133,7 @@ async function loadFolderFiles(search) {
           </div>
         </div>
         <div class="file-actions">
-          <button class="abtn abtn-dl" onclick="downloadFolderFile('${f._id}','${f.title.replace(/'/g,"\'")}')">⬇ Download</button>
+          <button class="abtn abtn-dl" onclick="downloadFolderFile('${f._id}','${f.title.replace(/'/g,"\\'")}')">⬇ Download</button>
           ${canDel ? `<button class="abtn abtn-del" onclick="confirmDel('file','${f._id}','Delete &quot;${f.title}&quot;? This cannot be undone.')">🗑 Delete</button>` : ''}
         </div>
       </div>`;
@@ -1155,7 +1149,6 @@ function onFolderSearch() {
   else loadFolders(q);
 }
 
-// ── Create new folder ──
 function openNewFolderModal() {
   if (!currentUser) { showToast('Please log in first.', 'err'); return; }
   document.getElementById('nf-err').classList.remove('show');
@@ -1188,7 +1181,6 @@ async function submitNewFolder() {
   }
 }
 
-// ── Upload PDF to folder ──
 function openUploadToFolderModal() {
   if (!currentUser) { showToast('Please log in first.', 'err'); return; }
   if (!currentFolder) { showToast('Please open a folder first.', 'err'); return; }
@@ -1243,7 +1235,6 @@ async function submitFolderUpload() {
   }
 }
 
-// ── Download file from folder ──
 async function downloadFolderFile(id, title) {
   if (!currentUser) { showToast('Please log in to download.', 'err'); return; }
   try {
@@ -1260,7 +1251,6 @@ async function downloadFolderFile(id, title) {
   } catch (e) { showToast('Download failed: ' + e.message, 'err'); }
 }
 
-// ── Delete folder or file ──
 function confirmDel(type, id, msg) {
   if (!currentUser) { showToast('Please log in first.', 'err'); return; }
   pendingDelId = id; pendingDelType = type;
@@ -1275,15 +1265,14 @@ async function executeDel() {
     if (pendingDelType === 'folder') {
       await api('DELETE', '/folders/' + pendingDelId);
       goBackToFolders();
-      showToast('Folder and all its files deleted! 🗑', 'ok');
-      loadDashboard();
+      showToast('Folder and all its files deleted! 🗑');
+      loadResources();
     } else {
       await api('DELETE', '/resources/' + pendingDelId);
-      showToast('Resource deleted! 🗑', 'ok');
+      showToast('Resource deleted! 🗑');
       closeModal();
       if (currentFolder) await loadFolderFiles();
       loadResources();
-      loadDashboard();
     }
   } catch (e) { showToast(e.message, 'err'); }
 }
