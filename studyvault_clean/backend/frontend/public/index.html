@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyVault — Student Resource Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Epilogue:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#141720;--card:#1c2030;--border:#2a2f42;
+  --accent:#f0c93a;--accent2:#5b8fff;--accent3:#ff6b6b;--green:#4ade80;
+  --text:#f0eee8;--muted:#7a8099;--dim:#3a4060;
+  --pf:'Playfair Display',serif;--ep:'Epilogue',sans-serif;
+}
+body{font-family:var(--ep);background:var(--bg);color:var(--text);min-height:100vh}
+.page{display:none}.page.active{display:block}
+input,select,textarea,button{font-family:var(--ep)}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:58px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--pf);font-size:20px;font-weight:900;cursor:pointer}.logo span{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn.primary{background:var(--accent);color:#0d0f14;border-color:var(--accent);font-weight:600}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 14px 5px 8px;font-size:13px;cursor:pointer}
+.avatar-sm{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#0d0f14;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+
+/* AUTH */
+.auth-wrap{min-height:calc(100vh - 58px);display:flex;align-items:center;justify-content:center;padding:2rem}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px;width:100%;max-width:400px}
+.auth-box h2{font-family:var(--pf);font-size:24px;font-weight:900;margin-bottom:4px}
+.auth-box .subtitle{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.fg input,.fg select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;font-size:13px;color:var(--text);outline:none;transition:border .2s}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.fg input::placeholder{color:var(--muted)}
+.fg .hint{font-size:11px;color:var(--muted);margin-top:4px}
+.fg .hint.ok{color:var(--green)}.fg .hint.err{color:var(--accent3)}
+.pass-bar{height:3px;border-radius:2px;margin-top:5px;background:var(--dim);transition:all .3s}
+.auth-submit{width:100%;background:var(--accent);color:#0d0f14;border:none;border-radius:10px;padding:12px;font-family:var(--pf);font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:opacity .2s}
+.auth-submit:hover{opacity:.88}
+.auth-submit:disabled{opacity:.5;cursor:not-allowed}
+.auth-err{background:#2a1a1a;border:1px solid #4a2a2a;color:var(--accent3);border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:14px;display:none}
+.auth-err.show{display:block}
+.auth-link{text-align:center;font-size:13px;color:var(--muted);margin-top:14px}
+.auth-link a{color:var(--accent);cursor:pointer;font-weight:600}
+.otp-display{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:20px;text-align:center;margin-bottom:14px}
+.otp-code{font-family:var(--pf);font-size:34px;font-weight:900;color:var(--accent);letter-spacing:8px}
+.otp-note{font-size:11px;color:var(--muted);margin-top:4px}
+.security-note{background:#1a2a1a;border:1px solid #2a4a2a;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* LANDING */
+.hero{padding:4rem 2rem 2rem;max-width:920px;margin:0 auto;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:#1a2a1a;color:var(--green);border:1px solid #2a4a2a;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:1.25rem}
+.hero h1{font-family:var(--pf);font-size:clamp(30px,5vw,52px);font-weight:900;letter-spacing:-1.5px;line-height:1.05;margin-bottom:1rem}
+.hero h1 em{color:var(--accent);font-style:normal}
+.hero p{color:var(--muted);font-size:15px;max-width:460px;margin:0 auto 2rem;line-height:1.7}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hbtn{padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.hbtn-p{background:var(--accent);color:#0d0f14}.hbtn-p:hover{opacity:.88}
+.hbtn-o{background:transparent;color:var(--text);border:1px solid var(--border)}.hbtn-o:hover{border-color:var(--accent);color:var(--accent)}
+.stats-row{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;padding:2rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:2rem 0}
+.stat-i{text-align:center}
+.stat-n{font-family:var(--pf);font-size:28px;font-weight:900;color:var(--accent)}
+.stat-l{font-size:12px;color:var(--muted);margin-top:2px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:920px;margin:0 auto;padding:0 2rem 3rem}
+.feat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.feat-icon{font-size:24px;margin-bottom:10px}
+.feat-title{font-family:var(--pf);font-size:14px;font-weight:700;margin-bottom:5px}
+.feat-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* DASHBOARD */
+.dash-layout{display:grid;grid-template-columns:220px 1fr;height:calc(100vh - 58px);overflow:hidden}
+.snav{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 1rem;overflow-y:auto}
+.snav-sect{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 5px;padding:0 8px}
+.snav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left}
+.snav-item:hover{background:var(--card);color:var(--text)}
+.snav-item.active{background:var(--accent);color:#0d0f14;font-weight:600}
+.snav-icon{font-size:15px;width:20px;text-align:center}
+.snav-badge{margin-left:auto;background:var(--accent3);color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700}
+.dcontent{overflow-y:auto;padding:1.5rem 2rem}
+.tab{display:none}.tab.active{display:block}
+.dh{margin-bottom:1.5rem}
+.dh h1{font-family:var(--pf);font-size:22px;font-weight:900;margin-bottom:3px}
+.dh p{font-size:13px;color:var(--muted)}
+
+/* STATS STRIP */
+.sstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.sc-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.sc-n{font-family:var(--pf);font-size:22px;font-weight:900}
+.y{color:var(--accent)}.b{color:var(--accent2)}.r{color:var(--accent3)}.g{color:var(--green)}
+
+/* RESOURCE CARDS */
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+.rcard{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px;cursor:pointer;transition:all .2s}
+.rcard:hover{border-color:var(--dim);transform:translateY(-1px)}
+.rcard-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.ficon{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fn{background:#1a2a1a}.fp{background:#1a1a2a}.fa{background:#2a1a1a}
+.rc-title{font-family:var(--pf);font-size:13px;font-weight:700;line-height:1.3;margin-bottom:2px}
+.rc-sub{font-size:11px;color:var(--muted)}
+.rc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.rc-meta{font-size:10px;color:var(--muted);display:flex;gap:8px}
+.tag{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.tn{background:#1a2a1a;color:#6fcf6f}.tp{background:#1a1a2a;color:var(--accent2)}.ta{background:#2a1a1a;color:var(--accent3)}
+.dl-btn{background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer}
+.dl-btn:hover{opacity:.8}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:1rem;opacity:.4}
+
+/* UPLOAD FORM */
+.uform{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:600px}
+.drop-zone{border:2px dashed var(--dim);border-radius:12px;padding:28px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;margin-bottom:14px;position:relative}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);color:var(--accent);background:#1a1800}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz-name{margin-top:6px;font-size:12px;color:var(--accent);font-weight:600}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;resize:none;height:80px;transition:border .2s}
+.fg textarea:focus{border-color:var(--accent)}
+.fg textarea::placeholder{color:var(--muted)}
+.fg select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;cursor:pointer}
+.fg select option{background:var(--card)}
+.sub-btn{background:var(--accent);color:#0d0f14;border:none;border-radius:10px;padding:12px 28px;font-family:var(--pf);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.sub-btn:hover{opacity:.88}
+.sub-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* NOTIFICATIONS */
+.nitem{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.nicon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--dim)}
+.nbody{flex:1}
+.ntitle{font-size:13px;font-weight:600;margin-bottom:2px}
+.nsub{font-size:11px;color:var(--muted)}
+.ntime{font-size:11px;color:var(--muted);white-space:nowrap}
+.udot{width:8px;height:8px;background:var(--accent);border-radius:50%;margin-top:5px;flex-shrink:0}
+
+/* PROFILE */
+.pbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:500px;margin-bottom:16px}
+.pav{width:72px;height:72px;border-radius:50%;background:var(--accent);color:#0d0f14;display:flex;align-items:center;justify-content:center;font-family:var(--pf);font-size:26px;font-weight:900;margin-bottom:12px}
+.pbadge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block;margin:3px}
+.pb-v{background:#1a2a1a;color:var(--green)}.pb-r{background:#1a1a2a;color:var(--accent2)}.pb-p{background:#2a2010;color:var(--accent)}
+.pstat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.pstat{text-align:center;background:var(--surface);border-radius:10px;padding:10px}
+.pstat-n{font-family:var(--pf);font-size:18px;font-weight:900;color:var(--accent)}
+.pstat-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* SEARCH */
+.sbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.sbar input{flex:1;min-width:140px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 14px;font-size:13px;color:var(--text);outline:none}
+.sbar input::placeholder{color:var(--muted)}
+.sbar select{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:13px;color:var(--text);outline:none;cursor:pointer}
+.sbar select option{background:var(--card)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.overlay.hidden{display:none}
+.mbox{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:22px}
+.mheader{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.mtitle{font-family:var(--pf);font-size:18px;font-weight:700;flex:1;padding-right:12px}
+.mclose{background:var(--dim);border:none;color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0}
+.star-row{display:flex;gap:4px;margin-bottom:12px}
+.rstar{font-size:22px;cursor:pointer;color:var(--dim);transition:color .1s;background:none;border:none;padding:0}
+.rstar.sel{color:var(--accent)}
+.comment{background:var(--card);border-radius:9px;padding:10px 12px;margin-bottom:8px}
+.cauth{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px}
+.ctext{font-size:13px;line-height:1.5}
+.cin-row{display:flex;gap:8px;margin-top:10px}
+.cin-row input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);outline:none}
+.cin-row input::placeholder{color:var(--muted)}
+.csend{background:var(--accent);color:#0d0f14;border:none;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.sect-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#0d0f14;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:300px}
+.toast.show{opacity:1}.toast.err{background:var(--accent3);color:#fff}
+
+/* SPINNER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#0d0f14;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SECTION TITLE */
+.stitle{font-family:var(--pf);font-size:17px;font-weight:700;margin-bottom:12px}
+
+/* FOLDERS */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:1rem;flex-wrap:wrap}
+.bc-link{cursor:pointer;color:var(--accent2);transition:color .2s}.bc-link:hover{color:var(--accent)}
+.bc-sep{color:var(--dim)}.bc-cur{color:var(--text);font-weight:500}
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.tbtn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;transition:all .2s}
+.tbtn:hover{border-color:var(--accent);color:var(--accent)}
+.tbtn.tp{background:var(--accent);color:#0d0f14;border-color:var(--accent);font-weight:600}
+.folders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:1.5rem}
+.folder-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 14px;cursor:pointer;transition:all .2s;position:relative}
+.folder-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.folder-icon{font-size:30px;margin-bottom:8px;display:block}
+.folder-name{font-family:var(--pf);font-size:13px;font-weight:700;margin-bottom:3px;line-height:1.3}
+.folder-meta{font-size:11px;color:var(--muted)}
+.folder-owner{font-size:10px;color:var(--muted);margin-top:4px;padding-top:4px;border-top:1px solid var(--border)}
+.folder-actions{display:flex;gap:4px;margin-top:8px}
+.fab{font-size:10px;padding:3px 8px;border-radius:5px;border:none;cursor:pointer;font-family:var(--ep);transition:all .2s}
+.fab-open{background:var(--accent2);color:#fff}
+.fab-del{background:#2a1a1a;color:var(--accent3)}.fab-del:hover{background:#3a2020}
+.mine-badge{position:absolute;top:8px;right:8px;background:#1a2a1a;color:var(--green);font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px}
+.files-list{display:flex;flex-direction:column;gap:8px}
+.file-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.file-icon-sm{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:#1a1a2a;color:var(--accent2)}
+.file-info{flex:1}
+.file-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.file-meta-row{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.file-actions{display:flex;gap:6px;flex-shrink:0}
+.abtn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:opacity .2s}
+.abtn:hover{opacity:.8}
+.abtn-dl{background:var(--accent2);color:#fff}
+.abtn-del{background:#2a1a1a;color:var(--accent3);border:1px solid #4a2a2a}.abtn-del:hover{background:#3a2020}
+.confirm-wrap{display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.8);min-height:200px}
+.confirm-wrap.hidden{display:none}
+.confirm-box{background:var(--surface);border:1px solid #4a2a2a;border-radius:14px;padding:22px;max-width:360px;width:100%;text-align:center}
+.confirm-box h3{font-family:var(--pf);font-size:16px;margin-bottom:8px;color:var(--accent3)}
+.confirm-box p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.cbtns{display:flex;gap:8px;justify-content:center}
+.cbtn-yes{background:var(--accent3);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer}
+.cbtn-no{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer}
+.merr{background:#2a1a1a;border:1px solid #4a2a2a;color:var(--accent3);border-radius:7px;padding:8px 12px;font-size:12px;margin-bottom:10px;display:none}
+.merr.show{display:block}
+
+@media(max-width:640px){
+  .dash-layout{grid-template-columns:1fr}
+  .snav{display:none}
+  .sstrip{grid-template-columns:1fr 1fr}
+  .rgrid{grid-template-columns:1fr}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  nav{padding:0 1rem}
+  .auth-box{padding:20px}
+  .folders-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="goPage('landing')">Study<span>Vault</span></div>
+  <div class="nav-right" id="nav-right">
+    <button class="nav-btn" onclick="goPage('login')">Log In</button>
+    <button class="nav-btn primary" onclick="goPage('register')">Register</button>
+  </div>
+</nav>
+
+<!-- ===== LANDING ===== -->
+<div id="pg-landing" class="page active">
+  <div class="hero">
+    <div class="hero-badge">🔒 University Email Only — Verified Access</div>
+    <h1>The student resource<br>vault for your <em>university</em></h1>
+    <p>Upload notes, past papers & assignments. Download, rate and comment — locked to verified university students only.</p>
+    <div class="hero-btns">
+      <button class="hbtn hbtn-p" onclick="goPage('register')">Get Access →</button>
+      <button class="hbtn hbtn-o" onclick="goPage('login')">Log In</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-i"><div class="stat-n">1,240+</div><div class="stat-l">Resources</div></div>
+    <div class="stat-i"><div class="stat-n">8,400+</div><div class="stat-l">Downloads</div></div>
+    <div class="stat-i"><div class="stat-n">980+</div><div class="stat-l">Verified Students</div></div>
+    <div class="stat-i"><div class="stat-n">100%</div><div class="stat-l">University Only</div></div>
+  </div>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-icon">🔒</div><div class="feat-title">University Email Gate</div><div class="feat-desc">Only .edu.pk or .ac.pk emails can register. Outsiders are blocked.</div></div>
+    <div class="feat"><div class="feat-icon">🔔</div><div class="feat-title">Real Admin Alerts</div><div class="feat-desc">Every login and download sends a real email to the admin instantly.</div></div>
+    <div class="feat"><div class="feat-icon">📄</div><div class="feat-title">Real PDF Downloads</div><div class="feat-desc">Upload actual PDF files. Students download the real file securely.</div></div>
+    <div class="feat"><div class="feat-icon">⭐</div><div class="feat-title">Ratings & Comments</div><div class="feat-desc">Community-driven quality control. Rate every resource.</div></div>
+    <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Personal Dashboard</div><div class="feat-desc">See your uploads, downloads, points and notifications.</div></div>
+    <div class="feat"><div class="feat-icon">🛡️</div><div class="feat-title">Bcrypt Passwords</div><div class="feat-desc">Passwords are hashed with bcrypt. Never stored in plain text.</div></div>
+  </div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div id="pg-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <h2>Welcome back</h2>
+      <p class="subtitle">Log in with your university email and password.</p>
+      <div class="security-note">🔒 Only verified university students can access this platform</div>
+      <div class="auth-err" id="login-err"></div>
+      <div class="fg">
+        <label>University Email</label>
+        <input id="l-email" type="email" placeholder="yourname@university.edu.pk" autocomplete="email"/>
+        <div class="hint">Must be a registered university email</div>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input id="l-pass" type="password" placeholder="Your password" autocomplete="current-password"/>
+      </div>
+      <button class="auth-submit" id="login-btn" onclick="doLogin()">Log In Securely</button>
+      <div class="auth-link">Forgot password? <a onclick="goPage('forgot')">Reset it</a></div>
+      <div class="auth-link" style="margin-top:8px">No account? <a onclick="goPage('register')">Register here</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REGISTER ===== -->
+<div id="pg-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <h2>Create Account</h2>
+      <p class="subtitle">Register with your university email to get full access.</p>
+      <div class="auth-err" id="reg-err"></div>
+      <div class="fg">
+        <label>Full Name</label>
+        <input id="r-name" placeholder="e.g. Ali Raza" autocomplete="name"/>
+      </div>
+      <div class="fg">
+        <label>University Email</label>
+        <input id="r-email" type="email" placeholder="yourname@university.edu.pk" oninput="checkDomain()" autocomplete="email"/>
+        <div class="hint" id="domain-hint">⚠ Only .edu.pk, .ac.pk or university emails accepted</div>
+      </div>
+      <div class="fg">
+        <label>University / Department</label>
+        <input id="r-dept" placeholder="e.g. CS — University of Karachi"/>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input id="r-pass" type="password" placeholder="Minimum 8 characters" oninput="checkStrength()" autocomplete="new-password"/>
+        <div class="pass-bar" id="pbar"></div>
+      </div>
+      <div class="fg">
+        <label>Confirm Password</label>
+        <input id="r-pass2" type="password" placeholder="Repeat your password" autocomplete="new-password"/>
+      </div>
+      <button class="auth-submit" id="reg-btn" onclick="doRegister()">Create Account</button>
+      <div class="auth-link">Already registered? <a onclick="goPage('login')">Log In</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== OTP ===== -->
+<div id="pg-otp" class="page">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <h2>Verify Your Email</h2>
+      <p class="subtitle" id="otp-msg">We sent a 6-digit code to your email. Enter it below.</p>
+      <div class="auth-err" id="otp-err"></div>
+      <div class="fg">
+        <label>6-Digit OTP Code</label>
+        <input id="otp-inp" placeholder="Enter OTP from your email" maxlength="6" type="tel"/>
+      </div>
+      <button class="auth-submit" id="otp-btn" onclick="verifyOTP()">Verify & Enter</button>
+      <div class="auth-link"><a onclick="resendOTP()">Resend OTP</a></div>
+      <div class="auth-link" style="margin-top:6px"><a onclick="goPage('register')">← Back</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FORGOT PASSWORD ===== -->
+<div id="pg-forgot" class="page">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <h2>Reset Password</h2>
+      <p class="subtitle">Enter your university email and we'll send a reset link.</p>
+      <div class="auth-err" id="forgot-err"></div>
+      <div class="fg">
+        <label>University Email</label>
+        <input id="f-email" type="email" placeholder="yourname@university.edu.pk"/>
+      </div>
+      <button class="auth-submit" id="forgot-btn" onclick="doForgot()">Send Reset Link</button>
+      <div class="auth-link"><a onclick="goPage('login')">← Back to Login</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="pg-dashboard" class="page">
+  <div class="dash-layout">
+    <div class="snav">
+      <div class="snav-sect">Main</div>
+      <button class="snav-item active" onclick="showTab('home',this)"><span class="snav-icon">🏠</span> Dashboard</button>
+      <button class="snav-item" onclick="showTab('folders',this)"><span class="snav-icon">📁</span> Subject Folders</button>
+      <button class="snav-item" onclick="showTab('browse',this)"><span class="snav-icon">📚</span> Browse Resources</button>
+      <button class="snav-item" onclick="showTab('upload',this)"><span class="snav-icon">📤</span> Upload Resource</button>
+      <div class="snav-sect">Account</div>
+      <button class="snav-item" onclick="showTab('notifications',this)"><span class="snav-icon">🔔</span> Notifications <span class="snav-badge" id="nb-count">0</span></button>
+      <button class="snav-item" onclick="showTab('profile',this)"><span class="snav-icon">👤</span> My Profile</button>
+      <div class="snav-sect">System</div>
+      <button class="snav-item" onclick="doLogout()"><span class="snav-icon">🚪</span> Logout</button>
+    </div>
+    <div class="dcontent">
+
+      <!-- HOME TAB -->
+      <div id="tab-home" class="tab active">
+        <div class="dh">
+          <h1 id="d-greeting">Welcome back 👋</h1>
+          <p id="d-sub">Here's what's happening in StudyVault today.</p>
+        </div>
+        <div class="sstrip">
+          <div class="sc"><div class="sc-l">My Uploads</div><div class="sc-n y" id="st-up">—</div></div>
+          <div class="sc"><div class="sc-l">My Points</div><div class="sc-n g" id="st-pts">—</div></div>
+          <div class="sc"><div class="sc-l">Total Resources</div><div class="sc-n b" id="st-total">—</div></div>
+          <div class="sc"><div class="sc-l">Notifications</div><div class="sc-n r" id="st-notif">0</div></div>
+        </div>
+        <div class="stitle">Recent Resources</div>
+        <div class="rgrid" id="home-grid"><div class="empty-state"><div class="empty-icon">📚</div>Loading resources...</div></div>
+      </div>
+
+      <!-- BROWSE TAB -->
+      <div id="tab-browse" class="tab">
+        <div class="dh"><h1>Browse Resources</h1><p>Find notes, past papers & assignments from your peers.</p></div>
+        <div class="sbar">
+          <input id="br-q" placeholder="Search title, subject..." oninput="loadResources()"/>
+          <select id="br-type" onchange="loadResources()">
+            <option value="">All Types</option>
+            <option value="Notes">Notes</option>
+            <option value="Past Paper">Past Papers</option>
+            <option value="Assignment">Assignments</option>
+          </select>
+          <select id="br-sem" onchange="loadResources()">
+            <option value="">All Semesters</option>
+            <option>Sem 1</option><option>Sem 2</option><option>Sem 3</option>
+            <option>Sem 4</option><option>Sem 5</option><option>Sem 6</option>
+          </select>
+        </div>
+        <div class="rgrid" id="browse-grid"><div class="empty-state"><div class="empty-icon">📚</div>Loading...</div></div>
+      </div>
+
+      <!-- UPLOAD TAB -->
+      <div id="tab-upload" class="tab">
+        <div class="dh"><h1>Upload a Resource</h1><p>Share your notes, papers or assignments. +20 points per upload!</p></div>
+        <div class="uform">
+          <div class="drop-zone" id="dzone">
+            📂 Click or drag & drop your PDF here<br>
+            <span style="font-size:11px;opacity:.6">PDF only — max 20MB</span>
+            <div class="dz-name" id="dz-name"></div>
+            <input type="file" accept=".pdf" id="file-inp" onchange="onFile()"/>
+          </div>
+          <div class="fg-row">
+            <div class="fg"><label>Title</label><input id="up-title" placeholder="e.g. DS Notes Ch 1–5"/></div>
+            <div class="fg"><label>Subject Code</label><input id="up-subj" placeholder="e.g. CS301"/></div>
+          </div>
+          <div class="fg-row">
+            <div class="fg"><label>Type</label>
+              <select id="up-type"><option>Notes</option><option>Past Paper</option><option>Assignment</option></select>
+            </div>
+            <div class="fg"><label>Semester</label>
+              <select id="up-sem"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>Description</label><textarea id="up-desc" placeholder="What topics does this cover?"></textarea></div>
+          <button class="sub-btn" id="up-btn" onclick="submitUpload()">Upload & Notify Admin</button>
+        </div>
+      </div>
+
+      <!-- FOLDERS TAB -->
+      <div id="tab-folders" class="tab">
+        <div class="dh">
+          <h1 id="folder-page-title">Subject Folders</h1>
+          <p id="folder-page-sub">Browse subject folders or create your own. Upload PDFs inside any folder.</p>
+        </div>
+        <div class="breadcrumb" id="folder-breadcrumb">
+          <span class="bc-cur">All Subjects</span>
+        </div>
+        <div class="toolbar">
+          <input class="sbar" style="flex:1;min-width:140px;margin-bottom:0" id="folder-search-inp" placeholder="Search folders or files..." oninput="onFolderSearch()"/>
+          <button class="tbtn tp" id="btn-new-folder" onclick="openNewFolderModal()">＋ New Folder</button>
+          <button class="tbtn tp" id="btn-upload-to-folder" style="display:none" onclick="openUploadToFolderModal()">⬆ Upload PDF</button>
+          <button class="tbtn" id="btn-back-folder" style="display:none" onclick="goBackToFolders()">← Back</button>
+        </div>
+        <div id="folders-grid-view"></div>
+        <div id="folder-files-view" style="display:none"></div>
+      </div>
+
+      <!-- NOTIFICATIONS TAB -->
+      <div id="tab-notifications" class="tab">
+        <div class="dh"><h1>Notifications</h1><p>Your activity and system alerts.</p></div>
+        <div id="notif-list"></div>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div id="tab-profile" class="tab">
+        <div class="dh"><h1>My Profile</h1></div>
+        <div class="pbox">
+          <div class="pav" id="pav">?</div>
+          <div style="font-family:var(--pf);font-size:20px;font-weight:900;margin-bottom:2px" id="pname">—</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px" id="pemail">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px" id="pdept">—</div>
+          <div>
+            <span class="pbadge pb-v">✓ University Verified</span>
+            <span class="pbadge pb-r">Student</span>
+            <span class="pbadge pb-p" id="ppts-badge">0 Points</span>
+          </div>
+          <div class="pstat-row">
+            <div class="pstat"><div class="pstat-n" id="ps-up">0</div><div class="pstat-l">Uploads</div></div>
+            <div class="pstat"><div class="pstat-n" id="ps-pts">0</div><div class="pstat-l">Points</div></div>
+            <div class="pstat"><div class="pstat-n" id="ps-join">—</div><div class="pstat-l">Joined</div></div>
+          </div>
+        </div>
+        <div class="stitle">My Uploads</div>
+        <div class="rgrid" id="my-grid"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RESOURCE MODAL -->
+<div class="overlay hidden" id="res-modal">
+  <div class="mbox">
+    <div class="mheader">
+      <div class="mtitle" id="rm-title">—</div>
+      <button class="mclose" onclick="closeModal()">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px" id="rm-meta"></div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:14px" id="rm-desc"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+      <button class="sub-btn" style="padding:10px 20px;font-size:13px;flex:1" id="dl-btn" onclick="downloadRes()">⬇ Download PDF</button>
+      <button id="modal-del-btn" style="display:none;background:#e74c3c;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;font-weight:600" onclick="modalDeleteRes()">🗑 Delete</button>
+    </div>
+    <div class="sect-label">Rate this resource</div>
+    <div class="star-row" id="modal-stars"></div>
+    <div class="sect-label">Comments</div>
+    <div id="modal-comments" style="margin-bottom:8px"></div>
+    <div class="cin-row">
+      <input id="cin" placeholder="Add a comment..."/>
+      <button class="csend" onclick="postComment()">Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW FOLDER MODAL -->
+<div class="overlay hidden" id="new-folder-modal">
+  <div class="mbox">
+    <div class="mheader">
+      <div class="mtitle">Create Subject Folder</div>
+      <button class="mclose" onclick="closeAnyModal('new-folder-modal')">&#x2715;</button>
+    </div>
+    <div class="merr" id="nf-err"></div>
+    <div class="fg"><label>Subject Name</label><input id="nf-name" placeholder="e.g. Data Structures"/></div>
+    <div class="fg-row">
+      <div class="fg"><label>Subject Code</label><input id="nf-code" placeholder="e.g. CS301"/></div>
+      <div class="fg"><label>Semester</label>
+        <select id="nf-sem"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option selected>Sem 4</option><option>Sem 5</option><option>Sem 6</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Description (optional)</label>
+      <textarea id="nf-desc" placeholder="What topics does this folder cover?"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="mclose" style="flex:0;padding:10px 16px;font-size:12px;border-radius:8px;width:auto" onclick="closeAnyModal('new-folder-modal')">Cancel</button>
+      <button class="sub-btn" style="flex:1" id="nf-btn" onclick="submitNewFolder()">Create Folder</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD TO FOLDER MODAL -->
+<div class="overlay hidden" id="upload-folder-modal">
+  <div class="mbox">
+    <div class="mheader">
+      <div class="mtitle" id="uf-modal-title">Upload PDF to Folder</div>
+      <button class="mclose" onclick="closeAnyModal('upload-folder-modal')">&#x2715;</button>
+    </div>
+    <div class="merr" id="uf-err"></div>
+    <div class="drop-zone" id="uf-dzone">
+      &#x1F4C2; Click or drag &amp; drop PDF here<br>
+      <span style="font-size:11px;opacity:.6">PDF only — max 20MB</span>
+      <div class="dz-name" id="uf-dz-name"></div>
+      <input type="file" accept=".pdf" id="uf-file-inp" onchange="onFolderFile()"/>
+    </div>
+    <div class="fg"><label>Title</label><input id="uf-title" placeholder="e.g. Chapter 5 Notes"/></div>
+    <div class="fg-row">
+      <div class="fg"><label>Type</label>
+        <select id="uf-type"><option>Notes</option><option>Past Paper</option><option>Assignment</option></select>
+      </div>
+      <div class="fg"><label>Year (optional)</label><input id="uf-year" placeholder="e.g. 2023"/></div>
+    </div>
+    <div class="fg"><label>Description</label>
+      <textarea id="uf-desc" placeholder="What does this cover?"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="mclose" style="flex:0;padding:10px 16px;font-size:12px;border-radius:8px;width:auto" onclick="closeAnyModal('upload-folder-modal')">Cancel</button>
+      <button class="sub-btn" style="flex:1" id="uf-btn" onclick="submitFolderUpload()">Upload PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-wrap hidden" id="confirm-delete-modal">
+  <div class="confirm-box">
+    <h3>&#x1F5D1; Confirm Delete</h3>
+    <p id="confirm-delete-msg">Are you sure?</p>
+    <div class="cbtns">
+      <button class="cbtn-no" onclick="closeAnyModal('confirm-delete-modal')">Cancel</button>
+      <button class="cbtn-yes" id="confirm-delete-yes">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = ''; // Empty = same origin. Change to 'http://localhost:5000' for dev
+let token = localStorage.getItem('sv_token');
+let currentUser = JSON.parse(localStorage.getItem('sv_user') || 'null');
+let pendingEmail = '';
+let activeRes = null;
+let selRating = 0;
+let selFile = null;
+let notifications = [];
+
+// ─── API HELPER ───
+async function api(method, path, body, isForm) {
+  const opts = {
+    method,
+    headers: { ...(token ? { Authorization: 'Bearer ' + token } : {}) }
+  };
+  if (isForm) { opts.body = body; }
+  else if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const res = await fetch(API + '/api' + path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Something went wrong.');
+  return data;
+}
+
+// ─── PAGES ───
+function goPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById('pg-' + p).classList.add('active');
+  document.querySelectorAll('.auth-err').forEach(e => { e.classList.remove('show'); e.textContent = ''; });
+}
+
+function goLanding() { goPage(currentUser ? 'dashboard' : 'landing'); }
+
+// ─── NAV ───
+function updateNav() {
+  const nr = document.getElementById('nav-right');
+  if (currentUser) {
+    const init = currentUser.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    nr.innerHTML = `<div class="user-chip"><div class="avatar-sm">${init}</div>${currentUser.name.split(' ')[0]}</div><button class="nav-btn" onclick="doLogout()">Logout</button>`;
+  } else {
+    nr.innerHTML = `<button class="nav-btn" onclick="goPage('login')">Log In</button><button class="nav-btn primary" onclick="goPage('register')">Register</button>`;
+  }
+}
+
+// ─── EMAIL VALIDATION ───
+function isAllowed(email) {
+  if (!email || !email.includes('@')) return false;
+  const d = email.split('@')[1].toLowerCase();
+  return ['edu.pk','ac.pk','edu','university.edu.pk'].some(x => d === x || d.endsWith('.' + x));
+}
+function checkDomain() {
+  const e = document.getElementById('r-email').value;
+  const h = document.getElementById('domain-hint');
+  if (!e) { h.textContent = '⚠ Only .edu.pk, .ac.pk or university emails'; h.className = 'hint'; return; }
+  if (isAllowed(e)) { h.textContent = '✓ Valid university email'; h.className = 'hint ok'; }
+  else { h.textContent = '✗ Not a recognized university email'; h.className = 'hint err'; }
+}
+function checkStrength() {
+  const p = document.getElementById('r-pass').value;
+  const b = document.getElementById('pbar');
+  let s = 0;
+  if (p.length >= 8) s++; if (p.length >= 12) s++;
+  if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^a-zA-Z0-9]/.test(p)) s++;
+  const cols = ['#ff6b6b','#ff6b6b','#f59e0b','#4ade80','#4ade80'];
+  b.style.background = p ? cols[Math.min(s, 4)] : 'var(--dim)';
+}
+
+// ─── REGISTER ───
+async function doRegister() {
+  const name = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim().toLowerCase();
+  const department = document.getElementById('r-dept').value.trim();
+  const password = document.getElementById('r-pass').value;
+  const pass2 = document.getElementById('r-pass2').value;
+  const err = document.getElementById('reg-err');
+  const btn = document.getElementById('reg-btn');
+
+  if (!name || !email || !department || !password) return showErr(err, 'Please fill in all fields.');
+  if (!isAllowed(email)) return showErr(err, 'Only university email addresses allowed (.edu.pk, .ac.pk).');
+  if (password.length < 8) return showErr(err, 'Password must be at least 8 characters.');
+  if (password !== pass2) return showErr(err, 'Passwords do not match.');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending OTP...';
+  try {
+    await api('POST', '/auth/register', { name, email, password, department });
+    pendingEmail = email;
+    document.getElementById('otp-msg').textContent = `A 6-digit code was sent to ${email}. Check your inbox!`;
+    goPage('otp');
+    showToast('OTP sent to your university email!');
+  } catch (e) {
+    showErr(err, e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+// ─── OTP ───
+async function verifyOTP() {
+  const otp = document.getElementById('otp-inp').value.trim();
+  const err = document.getElementById('otp-err');
+  const btn = document.getElementById('otp-btn');
+  if (!otp || otp.length < 6) return showErr(err, 'Please enter the 6-digit OTP.');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Verifying...';
+  try {
+    const data = await api('POST', '/auth/verify-otp', { email: pendingEmail, otp });
+    token = data.token; currentUser = data.user;
+    localStorage.setItem('sv_token', token);
+    localStorage.setItem('sv_user', JSON.stringify(currentUser));
+    updateNav(); goPage('dashboard'); initDashboard();
+    showToast('Email verified! Welcome to StudyVault 🎉');
+  } catch (e) {
+    showErr(err, e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verify & Enter';
+  }
+}
+async function resendOTP() {
+  if (!pendingEmail) return;
+  try {
+    await api('POST', '/auth/register', { email: pendingEmail, resend: true });
+    showToast('New OTP sent!');
+  } catch (e) { showToast('Could not resend. Try registering again.', 'err'); }
+}
+
+// ─── LOGIN ───
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim().toLowerCase();
+  const password = document.getElementById('l-pass').value;
+  const err = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
+  if (!email || !password) return showErr(err, 'Please enter email and password.');
+  if (!isAllowed(email)) return showErr(err, 'Only university email addresses allowed.');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Logging in...';
+  try {
+    const data = await api('POST', '/auth/login', { email, password });
+    token = data.token; currentUser = data.user;
+    localStorage.setItem('sv_token', token);
+    localStorage.setItem('sv_user', JSON.stringify(currentUser));
+    updateNav(); goPage('dashboard'); initDashboard();
+    showToast('Logged in successfully!');
+  } catch (e) {
+    showErr(err, e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Log In Securely';
+  }
+}
+
+// ─── FORGOT PASSWORD ───
+async function doForgot() {
+  const email = document.getElementById('f-email').value.trim();
+  const err = document.getElementById('forgot-err');
+  const btn = document.getElementById('forgot-btn');
+  if (!email) return showErr(err, 'Please enter your email.');
+  if (!isAllowed(email)) return showErr(err, 'Not a recognized university email.');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sending...';
+  try {
+    await api('POST', '/auth/forgot-password', { email });
+    showToast('Password reset link sent to your email!');
+    setTimeout(() => goPage('login'), 2000);
+  } catch (e) {
+    showErr(err, e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send Reset Link';
+  }
+}
+
+// ─── LOGOUT ───
+function doLogout() {
+  token = null; currentUser = null;
+  localStorage.removeItem('sv_token'); localStorage.removeItem('sv_user');
+  updateNav(); goPage('landing');
+  showToast('Logged out successfully.');
+}
+
+// ─── DASHBOARD ───
+function initDashboard() {
+  if (!currentUser) return;
+  document.getElementById('d-greeting').textContent = 'Welcome back, ' + currentUser.name.split(' ')[0] + ' 👋';
+  document.getElementById('d-sub').textContent = 'Logged in as ' + currentUser.email;
+  document.getElementById('pav').textContent = currentUser.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  document.getElementById('pname').textContent = currentUser.name;
+  document.getElementById('pemail').textContent = currentUser.email;
+  document.getElementById('pdept').textContent = currentUser.department || '';
+  document.getElementById('ppts-badge').textContent = (currentUser.points || 0) + ' Points';
+  document.getElementById('st-pts').textContent = currentUser.points || 0;
+  document.getElementById('ps-pts').textContent = currentUser.points || 0;
+  document.getElementById('ps-join').textContent = currentUser.joinedAt ? new Date(currentUser.joinedAt).getFullYear() : '2026';
+  loadResources();
+  loadMyUploads();
+  addNotif('🔔', 'Login recorded', 'Your login was logged and admin was notified.', 'now', true);
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.snav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'browse') loadResources();
+  if (tab === 'folders') { currentFolder = null; updateFolderBreadcrumb(null); loadFolders(); }
+}
+
+// ─── LOAD RESOURCES ───
+async function loadResources() {
+  const q = document.getElementById('br-q')?.value || '';
+  const type = document.getElementById('br-type')?.value || '';
+  const sem = document.getElementById('br-sem')?.value || '';
+  let params = new URLSearchParams();
+  if (q) params.set('search', q);
+  if (type) params.set('type', type);
+  if (sem) params.set('semester', sem);
+  try {
+    const resources = await api('GET', '/resources?' + params.toString());
+    document.getElementById('st-total').textContent = resources.length;
+    renderGrid('home-grid', resources.slice(0, 4));
+    renderGrid('browse-grid', resources);
+  } catch (e) {
+    document.getElementById('home-grid').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div>${e.message}</div>`;
+  }
+}
+
+async function loadMyUploads() {
+  try {
+    const resources = await api('GET', '/resources/my/uploads');
+    document.getElementById('st-up').textContent = resources.length;
+    document.getElementById('ps-up').textContent = resources.length;
+    renderGrid('my-grid', resources);
+  } catch (e) { console.error(e); }
+}
+
+// ─── RENDER GRID ───
+const TM = {
+  'Notes': { fi: 'fn', tag: 'tn', icon: '📄' },
+  'Past Paper': { fi: 'fp', tag: 'tp', icon: '📝' },
+  'Assignment': { fi: 'fa', tag: 'ta', icon: '📋' }
+};
+function renderGrid(id, resources) {
+  const g = document.getElementById(id);
+  if (!resources.length) {
+    g.innerHTML = `<div class="empty-state"><div class="empty-icon">📚</div>No resources found.<br><span style="color:var(--accent);cursor:pointer" onclick="showTab('upload',null)">Upload the first one →</span></div>`;
+    return;
+  }
+  g.innerHTML = resources.map(r => {
+    const tm = TM[r.type] || TM['Notes'];
+    return `<div class="rcard" onclick="openRes('${r._id}')">
+      <div class="rcard-top">
+        <div class="ficon ${tm.fi}">${tm.icon}</div>
+        <div style="flex:1">
+          <div class="rc-title">${r.title}</div>
+          <div class="rc-sub">${r.uploaderName} · ${r.semester || ''}</div>
+          <div style="margin-top:4px"><span class="tag ${tm.tag}">${r.type}</span> <span class="tag" style="background:var(--dim);color:var(--muted)">${r.subject}</span></div>
+        </div>
+      </div>
+      <div class="rc-footer">
+        <div class="rc-meta">
+          <span>⬇ ${r.downloads}</span>
+          <span style="color:var(--accent)">★ ${r.rating || 'New'}</span>
+          <span>💬 ${r.comments?.length || 0}</span>
+          ${r.filePath ? '<span style="color:var(--green)">PDF ✓</span>' : '<span style="color:var(--muted)">No PDF</span>'}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+        <button class="dl-btn" onclick="event.stopPropagation();quickDl('${r._id}','${(r.title||'').replace(/'/g,"\\'")}')">Download</button>
+          ${(currentUser && (r.uploaderEmail === currentUser.email || isAdminUser())) ? `<button style="background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-weight:600" onclick="event.stopPropagation();adminDeleteRes('${r._id}','${(r.title||'').replace(/'/g,"\\\\'")}')" title="Delete resource">🗑 Delete</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── OPEN RESOURCE ───
+async function openRes(id) {
+  try {
+    const resources = await api('GET', '/resources');
+    activeRes = resources.find(r => r._id === id);
+    if (!activeRes) return;
+    selRating = 0;
+    document.getElementById('rm-title').textContent = activeRes.title;
+    document.getElementById('rm-meta').textContent = [activeRes.subject, activeRes.type, activeRes.semester, 'by ' + activeRes.uploaderName].filter(Boolean).join(' · ');
+    document.getElementById('rm-desc').textContent = activeRes.description || 'No description provided.';
+    document.getElementById('modal-stars').innerHTML = [1,2,3,4,5].map(v =>
+      `<button class="rstar" onclick="setRating(${v})" data-v="${v}">★</button>`).join('');
+    renderComments();
+    // Show delete button in modal if user can delete
+    const delBtn = document.getElementById('modal-del-btn');
+    if (delBtn) {
+      const canDel = currentUser && (activeRes.uploaderEmail === currentUser.email || isAdminUser());
+      delBtn.style.display = canDel ? '' : 'none';
+    }
+    document.getElementById('res-modal').classList.remove('hidden');
+  } catch (e) { showToast(e.message, 'err'); }
+}
+function closeModal() { document.getElementById('res-modal').classList.add('hidden'); }
+function modalDeleteRes() {
+  if (!activeRes) return;
+  closeModal();
+  confirmDel('resource', activeRes._id, 'Delete &quot;' + activeRes.title + '&quot;? This cannot be undone.');
+}
+
+function setRating(v) {
+  selRating = v;
+  document.querySelectorAll('.rstar').forEach(s => s.classList.toggle('sel', parseInt(s.dataset.v) <= v));
+}
+function renderComments() {
+  const cl = document.getElementById('modal-comments');
+  const cs = activeRes.comments || [];
+  cl.innerHTML = cs.length
+    ? cs.map(c => `<div class="comment"><div class="cauth">${c.authorName} ${c.stars ? '★'.repeat(c.stars) : ''}</div><div class="ctext">${c.text}</div></div>`).join('')
+    : `<div style="font-size:12px;color:var(--muted);padding:6px 0;text-align:center">No comments yet. Be first!</div>`;
+}
+async function postComment() {
+  const text = document.getElementById('cin').value.trim();
+  if (!text) return showToast('Write something first.');
+  try {
+    const data = await api('POST', `/resources/${activeRes._id}/comment`, { text, stars: selRating || 0 });
+    activeRes = data.resource;
+    document.getElementById('cin').value = ''; selRating = 0;
+    document.querySelectorAll('.rstar').forEach(s => s.classList.remove('sel'));
+    renderComments(); loadResources();
+    showToast('Comment posted!');
+  } catch (e) { showToast(e.message, 'err'); }
+}
+
+// ─── DOWNLOAD ───
+async function downloadRes() {
+  if (!activeRes) return;
+  await doDownload(activeRes._id, activeRes.title);
+  closeModal();
+}
+function adminDeleteRes(id, title) {
+  confirmDel('resource', id, 'Delete &quot;' + title + '&quot;? This cannot be undone.');
+}
+async function quickDl(id, title) {
+  await doDownload(id, title);
+}
+async function doDownload(id, title) {
+  try {
+    const res = await fetch(API + `/api/resources/${id}/download`, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      return showToast(d.message || 'Download failed.', 'err');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = (title || 'resource') + '.pdf'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Downloading "' + title + '"...');
+    addNotif('⬇', 'Download recorded', 'You downloaded "' + title + '". Admin was notified.', 'now', false);
+    loadResources();
+  } catch (e) { showToast('Download failed: ' + e.message, 'err'); }
+}
+
+// ─── UPLOAD ───
+function onFile() {
+  const file = document.getElementById('file-inp').files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') { showToast('Only PDF files allowed!', 'err'); return; }
+  if (file.size > 20 * 1024 * 1024) { showToast('File too large. Max 20MB.', 'err'); return; }
+  selFile = file;
+  document.getElementById('dz-name').textContent = '✓ ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
+}
+async function submitUpload() {
+  const title = document.getElementById('up-title').value.trim();
+  const subject = document.getElementById('up-subj').value.trim();
+  const type = document.getElementById('up-type').value;
+  const semester = document.getElementById('up-sem').value;
+  const description = document.getElementById('up-desc').value.trim();
+  const btn = document.getElementById('up-btn');
+  if (!title || !subject) return showToast('Please fill in title and subject.', 'err');
+  const form = new FormData();
+  form.append('title', title); form.append('subject', subject);
+  form.append('type', type); form.append('semester', semester);
+  form.append('description', description);
+  if (selFile) form.append('pdf', selFile);
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Uploading...';
+  try {
+    await api('POST', '/resources/upload', form, true);
+    currentUser.points = (currentUser.points || 0) + 20;
+    localStorage.setItem('sv_user', JSON.stringify(currentUser));
+    document.getElementById('up-title').value = '';
+    document.getElementById('up-subj').value = '';
+    document.getElementById('up-desc').value = '';
+    document.getElementById('dz-name').textContent = '';
+    selFile = null;
+    initDashboard();
+    addNotif('📤', 'Upload successful', 'You uploaded "' + title + '". +20 points! Admin notified.', 'now', true);
+    showToast('Resource uploaded! Admin notified. +20 points 🎉');
+    showTab('browse', document.querySelectorAll('.snav-item')[1]);
+  } catch (e) {
+    showToast(e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Upload & Notify Admin';
+  }
+}
+
+// ─── NOTIFICATIONS ───
+function addNotif(icon, title, sub, time, unread) {
+  notifications.unshift({ icon, title, sub, time, unread });
+  const cnt = notifications.filter(n => n.unread).length;
+  document.getElementById('nb-count').textContent = cnt;
+  document.getElementById('st-notif').textContent = cnt;
+  renderNotifs();
+}
+function renderNotifs() {
+  const el = document.getElementById('notif-list');
+  if (!el) return;
+  el.innerHTML = notifications.length
+    ? notifications.map(n => `
+      <div class="nitem">
+        ${n.unread ? '<div class="udot"></div>' : '<div style="width:8px"></div>'}
+        <div class="nicon">${n.icon}</div>
+        <div class="nbody"><div class="ntitle">${n.title}</div><div class="nsub">${n.sub}</div></div>
+        <div class="ntime">${n.time}</div>
+      </div>`).join('')
+    : '<div class="empty-state"><div class="empty-icon">🔔</div>No notifications yet.</div>';
+}
+
+// ─── UTILS ───
+function showErr(el, msg) { el.textContent = msg; el.classList.add('show'); }
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (type === 'err' ? ' err' : '');
+  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+
+// ═══════════════════════════════════════════
+// FOLDER SYSTEM
+// ═══════════════════════════════════════════
+let currentFolder = null;
+let folderSelFile = null;
+let pendingDelId = null;
+let pendingDelType = null;
+const ADMIN_EMAIL_CLIENT = 'sindhuturkio20@gmail.com';
+
+function isAdminUser() { return currentUser && currentUser.email === ADMIN_EMAIL_CLIENT; }
+
+// ── Load and render folders ──
+async function loadFolders(search) {
+  const gv = document.getElementById('folders-grid-view');
+  const fv = document.getElementById('folder-files-view');
+  if (!gv) return;
+  gv.style.display = 'block'; fv.style.display = 'none';
+  document.getElementById('btn-new-folder').style.display = '';
+  document.getElementById('btn-upload-to-folder').style.display = 'none';
+  document.getElementById('btn-back-folder').style.display = 'none';
+  gv.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div>Loading folders...</div>';
+  try {
+    const folders = await api('GET', '/folders');
+    let list = folders;
+    if (search) list = folders.filter(f =>
+      f.name.toLowerCase().includes(search) || f.code.toLowerCase().includes(search));
+    if (!list.length) {
+      gv.className = '';
+      gv.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div>No folders yet.<br><span style="color:var(--accent);cursor:pointer" onclick="openNewFolderModal()">Create the first subject folder →</span></div>';
+      return;
+    }
+    gv.className = 'folders-grid';
+    gv.innerHTML = list.map(f => {
+      const isMine = currentUser && f.creatorEmail === currentUser.email;
+      const canDel = currentUser && (f.creatorEmail === currentUser.email || isAdminUser());
+      return `<div class="folder-card">
+        ${isMine ? '<span class="mine-badge">Mine</span>' : ''}
+        <span class="folder-icon">📁</span>
+        <div class="folder-name">${f.name}</div>
+        <div class="folder-meta">${f.code} · ${f.semester || ''}</div>
+        <div class="folder-meta">${f.fileCount || 0} file${(f.fileCount||0) !== 1 ? 's' : ''}</div>
+        <div class="folder-owner">by ${f.creatorName}</div>
+        <div class="folder-actions">
+          <button class="fab fab-open" onclick="openFolder('${f._id}','${f.name.replace(/'/g,"\'")}','${f.code}')">Open</button>
+          ${canDel ? `<button class="fab fab-del" onclick="event.stopPropagation();confirmDel('folder','${f._id}','Delete folder &quot;${f.name}&quot; and ALL files inside it?')">Delete</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    gv.className = '';
+    gv.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div>${e.message}</div>`;
+  }
+}
+
+// ── Open a folder and show its files ──
+async function openFolder(fid, fname, fcode) {
+  currentFolder = { _id: fid, name: fname, code: fcode };
+  document.getElementById('folder-page-title').textContent = fname;
+  document.getElementById('folder-page-sub').textContent = fcode + ' — Files inside this subject folder';
+  document.getElementById('folders-grid-view').style.display = 'none';
+  document.getElementById('folder-files-view').style.display = 'block';
+  document.getElementById('btn-new-folder').style.display = 'none';
+  document.getElementById('btn-upload-to-folder').style.display = currentUser ? '' : 'none';
+  document.getElementById('btn-back-folder').style.display = '';
+  updateFolderBreadcrumb(fname);
+  await loadFolderFiles();
+}
+
+function goBackToFolders() {
+  currentFolder = null;
+  document.getElementById('folder-page-title').textContent = 'Subject Folders';
+  document.getElementById('folder-page-sub').textContent = 'Browse subject folders or create your own. Upload PDFs inside any folder.';
+  updateFolderBreadcrumb(null);
+  loadFolders();
+}
+
+function updateFolderBreadcrumb(folderName) {
+  const bc = document.getElementById('folder-breadcrumb');
+  if (!folderName) {
+    bc.innerHTML = '<span class="bc-cur">All Subjects</span>';
+  } else {
+    bc.innerHTML = `<span class="bc-link" onclick="goBackToFolders()">All Subjects</span><span class="bc-sep">›</span><span class="bc-cur">${folderName}</span>`;
+  }
+}
+
+async function loadFolderFiles(search) {
+  const fv = document.getElementById('folder-files-view');
+  if (!fv || !currentFolder) return;
+  fv.innerHTML = '<div class="empty-state"><div class="empty-icon">📄</div>Loading files...</div>';
+  try {
+    let url = `/folders/${currentFolder._id}/files`;
+    if (search) url += `?search=${encodeURIComponent(search)}`;
+    const files = await api('GET', url);
+    if (!files.length) {
+      fv.innerHTML = `<div class="empty-state"><div class="empty-icon">📄</div>No files in this folder yet.${currentUser ? '<br><span style="color:var(--accent);cursor:pointer" onclick="openUploadToFolderModal()">Upload the first PDF →</span>' : ''}</div>`;
+      return;
+    }
+    fv.className = 'files-list';
+    fv.innerHTML = files.map(f => {
+      const isMine = currentUser && f.uploaderEmail === currentUser.email;
+      const canDel = currentUser && (f.uploaderEmail === currentUser.email || isAdminUser());
+      const typeClass = f.type === 'Notes' ? 'tn' : f.type === 'Past Paper' ? 'tp' : 'ta';
+      return `<div class="file-row">
+        <div class="file-icon-sm">📄</div>
+        <div class="file-info">
+          <div class="file-name">${f.title}${isMine ? ' <span style="font-size:9px;background:#1a2a1a;color:var(--green);padding:1px 5px;border-radius:10px;margin-left:4px">Mine</span>' : ''}</div>
+          <div class="file-meta-row">
+            <span class="tag ${typeClass}">${f.type}</span>
+            <span>by ${f.uploaderName}</span>
+            <span>⬇ ${f.downloads}</span>
+            ${f.fileSize ? '<span>' + Math.round(f.fileSize/1024) + ' KB</span>' : ''}
+            ${f.filePath ? '<span style="color:var(--green)">PDF ✓</span>' : '<span style="color:var(--muted)">No PDF</span>'}
+          </div>
+        </div>
+        <div class="file-actions">
+          <button class="abtn abtn-dl" onclick="downloadFolderFile('${f._id}','${f.title.replace(/'/g,"\'")}')">⬇ Download</button>
+          ${canDel ? `<button class="abtn abtn-del" onclick="confirmDel('file','${f._id}','Delete &quot;${f.title}&quot;? This cannot be undone.')">🗑 Delete</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    fv.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div>${e.message}</div>`;
+  }
+}
+
+function onFolderSearch() {
+  const q = document.getElementById('folder-search-inp').value.toLowerCase();
+  if (currentFolder) loadFolderFiles(q);
+  else loadFolders(q);
+}
+
+// ── Create new folder ──
+function openNewFolderModal() {
+  if (!currentUser) { showToast('Please log in first.', 'err'); return; }
+  document.getElementById('nf-err').classList.remove('show');
+  document.getElementById('nf-name').value = '';
+  document.getElementById('nf-code').value = '';
+  document.getElementById('nf-desc').value = '';
+  document.getElementById('new-folder-modal').classList.remove('hidden');
+}
+
+async function submitNewFolder() {
+  const name = document.getElementById('nf-name').value.trim();
+  const code = document.getElementById('nf-code').value.trim();
+  const semester = document.getElementById('nf-sem').value;
+  const description = document.getElementById('nf-desc').value.trim();
+  const err = document.getElementById('nf-err');
+  const btn = document.getElementById('nf-btn');
+  if (!name || !code) { err.textContent = 'Subject name and code are required.'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Creating...';
+  try {
+    await api('POST', '/folders', { name, code, semester, description });
+    closeAnyModal('new-folder-modal');
+    currentUser.points = (currentUser.points || 0) + 10;
+    localStorage.setItem('sv_user', JSON.stringify(currentUser));
+    loadFolders();
+    showToast('Folder "' + name + '" created! +10 points 🎉');
+  } catch (e) {
+    err.textContent = e.message; err.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Folder';
+  }
+}
+
+// ── Upload PDF to folder ──
+function openUploadToFolderModal() {
+  if (!currentUser) { showToast('Please log in first.', 'err'); return; }
+  if (!currentFolder) { showToast('Please open a folder first.', 'err'); return; }
+  document.getElementById('uf-err').classList.remove('show');
+  document.getElementById('uf-title').value = '';
+  document.getElementById('uf-year').value = '';
+  document.getElementById('uf-desc').value = '';
+  document.getElementById('uf-dz-name').textContent = '';
+  document.getElementById('uf-modal-title').textContent = 'Upload PDF to: ' + currentFolder.name;
+  folderSelFile = null;
+  document.getElementById('upload-folder-modal').classList.remove('hidden');
+}
+
+function onFolderFile() {
+  const file = document.getElementById('uf-file-inp').files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') { showToast('Only PDF files allowed!', 'err'); return; }
+  if (file.size > 20 * 1024 * 1024) { showToast('File too large. Max 20MB.', 'err'); return; }
+  folderSelFile = file;
+  document.getElementById('uf-dz-name').textContent = '✓ ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+}
+
+async function submitFolderUpload() {
+  const title = document.getElementById('uf-title').value.trim();
+  const type = document.getElementById('uf-type').value;
+  const year = document.getElementById('uf-year').value.trim();
+  const description = document.getElementById('uf-desc').value.trim();
+  const err = document.getElementById('uf-err');
+  const btn = document.getElementById('uf-btn');
+  if (!title) { err.textContent = 'Please enter a title.'; err.classList.add('show'); return; }
+  const form = new FormData();
+  form.append('title', title);
+  form.append('subject', currentFolder.code);
+  form.append('type', type);
+  form.append('semester', year || '');
+  form.append('description', description || '');
+  form.append('folderId', currentFolder._id);
+  form.append('folderName', currentFolder.name);
+  if (folderSelFile) form.append('pdf', folderSelFile);
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Uploading...';
+  try {
+    await api('POST', '/resources/upload', form, true);
+    currentUser.points = (currentUser.points || 0) + 20;
+    localStorage.setItem('sv_user', JSON.stringify(currentUser));
+    closeAnyModal('upload-folder-modal');
+    await loadFolderFiles();
+    showToast('PDF uploaded to "' + currentFolder.name + '"! +20 points 🎉');
+  } catch (e) {
+    err.textContent = e.message; err.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Upload PDF';
+  }
+}
+
+// ── Download file from folder ──
+async function downloadFolderFile(id, title) {
+  if (!currentUser) { showToast('Please log in to download.', 'err'); return; }
+  try {
+    const res = await fetch(API + `/api/resources/${id}/download`, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if (!res.ok) { const d = await res.json(); return showToast(d.message || 'Download failed.', 'err'); }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = title + '.pdf'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Downloading "' + title + '"...');
+    loadFolderFiles();
+  } catch (e) { showToast('Download failed: ' + e.message, 'err'); }
+}
+
+// ── Delete folder or file ──
+function confirmDel(type, id, msg) {
+  if (!currentUser) { showToast('Please log in first.', 'err'); return; }
+  pendingDelId = id; pendingDelType = type;
+  document.getElementById('confirm-delete-msg').innerHTML = msg;
+  document.getElementById('confirm-delete-yes').onclick = executeDel;
+  document.getElementById('confirm-delete-modal').classList.remove('hidden');
+}
+
+async function executeDel() {
+  closeAnyModal('confirm-delete-modal');
+  try {
+    if (pendingDelType === 'folder') {
+      await api('DELETE', '/folders/' + pendingDelId);
+      goBackToFolders();
+      showToast('Folder and all its files deleted! 🗑', 'ok');
+      loadDashboard();
+    } else {
+      await api('DELETE', '/resources/' + pendingDelId);
+      showToast('Resource deleted! 🗑', 'ok');
+      closeModal();
+      if (currentFolder) await loadFolderFiles();
+      loadResources();
+      loadDashboard();
+    }
+  } catch (e) { showToast(e.message, 'err'); }
+}
+
+function closeAnyModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// ─── INIT ───
+updateNav();
+if (currentUser && token) { goPage('dashboard'); initDashboard(); }
+</script>
+</body>
+</html>
