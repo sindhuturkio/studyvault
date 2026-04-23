@@ -227,6 +227,20 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .merr{background:#2a1a1a;border:1px solid #4a2a2a;color:var(--accent3);border-radius:7px;padding:8px 12px;font-size:12px;margin-bottom:10px;display:none}
 .merr.show{display:block}
 
+/* ADMIN */
+.admin-user-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.admin-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#0d0f14;display:flex;align-items:center;justify-content:center;font-family:var(--pf);font-size:14px;font-weight:900;flex-shrink:0}
+.admin-user-info{flex:1}
+.admin-user-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.admin-user-meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.admin-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.ab-admin{background:#2a1a2a;color:#c084fc}
+.ab-student{background:#1a2a1a;color:var(--green)}
+.admin-upload-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.admin-upload-info{flex:1}
+.admin-upload-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.admin-upload-meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+
 @media(max-width:640px){
   .dash-layout{grid-template-columns:1fr}
   .snav{display:none}
@@ -379,6 +393,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
       <button class="snav-item" onclick="showTab('folders',this)"><span class="snav-icon">📁</span> Subject Folders</button>
       <button class="snav-item" onclick="showTab('browse',this)"><span class="snav-icon">📚</span> Browse Resources</button>
       <button class="snav-item" onclick="showTab('upload',this)"><span class="snav-icon">📤</span> Upload Resource</button>
+      <div class="snav-sect">Admin</div>
+      <button class="snav-item" id="admin-nav-btn" style="display:none" onclick="showTab('admin',this)"><span class="snav-icon">🛡️</span> Admin Panel</button>
       <div class="snav-sect">Account</div>
       <button class="snav-item" onclick="showTab('notifications',this)"><span class="snav-icon">🔔</span> Notifications <span class="snav-badge" id="nb-count">0</span></button>
       <button class="snav-item" onclick="showTab('profile',this)"><span class="snav-icon">👤</span> My Profile</button>
@@ -473,6 +489,21 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
       <div id="tab-notifications" class="tab">
         <div class="dh"><h1>Notifications</h1><p>Your activity and system alerts.</p></div>
         <div id="notif-list"></div>
+      </div>
+
+      <!-- ADMIN TAB -->
+      <div id="tab-admin" class="tab">
+        <div class="dh"><h1>🛡️ Admin Panel</h1><p>Full control — only visible to you as admin.</p></div>
+        <div class="sstrip" id="admin-stats-strip">
+          <div class="sc"><div class="sc-l">Total Users</div><div class="sc-n y" id="adm-users">—</div></div>
+          <div class="sc"><div class="sc-l">Total Resources</div><div class="sc-n b" id="adm-res">—</div></div>
+          <div class="sc"><div class="sc-l">Total Folders</div><div class="sc-n g" id="adm-folders">—</div></div>
+          <div class="sc"><div class="sc-l">Total Downloads</div><div class="sc-n r" id="adm-downloads">—</div></div>
+        </div>
+        <div class="stitle">👥 All Registered Users</div>
+        <div id="admin-users-list" style="margin-bottom:1.5rem"></div>
+        <div class="stitle">📤 All Uploads</div>
+        <div id="admin-uploads-list" style="margin-bottom:1.5rem"></div>
       </div>
 
       <!-- PROFILE TAB -->
@@ -785,6 +816,7 @@ function initDashboard() {
   document.getElementById('ps-join').textContent = currentUser.joinedAt ? new Date(currentUser.joinedAt).getFullYear() : '2026';
   loadResources();
   loadMyUploads();
+  initAdminNav();
   addNotif('🔔', 'Login recorded', 'Your login was logged and admin was notified.', 'now', true);
 }
 
@@ -795,6 +827,7 @@ function showTab(tab, el) {
   if (el) el.classList.add('active');
   if (tab === 'browse') loadResources();
   if (tab === 'folders') { currentFolder = null; updateFolderBreadcrumb(null); loadFolders(); }
+  if (tab === 'admin') loadAdminPanel();
 }
 
 // ─── LOAD RESOURCES ───
@@ -1284,7 +1317,88 @@ function closeAnyModal(id) {
 // ─── INIT ───
 updateNav();
 if (currentUser && token) { goPage('dashboard'); initDashboard(); }
+
+// ═══════════════════════════════════════════
+// ADMIN PANEL
+// ═══════════════════════════════════════════
+function initAdminNav() {
+  const btn = document.getElementById('admin-nav-btn');
+  if (btn) btn.style.display = isAdminUser() ? '' : 'none';
+}
+
+async function loadAdminPanel() {
+  if (!isAdminUser()) return;
+  try {
+    // Load all users
+    const users = await api('GET', '/auth/admin/users');
+    document.getElementById('adm-users').textContent = users.length;
+    const usersList = document.getElementById('admin-users-list');
+    if (!users.length) {
+      usersList.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>No users yet.</div>';
+    } else {
+      usersList.innerHTML = users.map(u => {
+        const init = u.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const isAdmin = u.email === ADMIN_EMAIL_CLIENT;
+        const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PK') : 'Unknown';
+        return `<div class="admin-user-row">
+          <div class="admin-avatar">${init}</div>
+          <div class="admin-user-info">
+            <div class="admin-user-name">${u.name} ${isAdmin ? '<span class="admin-badge ab-admin">👑 Admin</span>' : '<span class="admin-badge ab-student">Student</span>'}</div>
+            <div class="admin-user-meta">
+              <span>📧 ${u.email}</span>
+              <span>🏫 ${u.department || 'N/A'}</span>
+              <span>📅 Joined ${joined}</span>
+              <span>⭐ ${u.points || 0} pts</span>
+              <span style="color:var(--green)">✓ Verified</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    document.getElementById('admin-users-list').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div>${e.message}</div>`;
+  }
+
+  try {
+    // Load all resources
+    const resources = await api('GET', '/resources');
+    document.getElementById('adm-res').textContent = resources.length;
+    const totalDl = resources.reduce((a,r) => a + (r.downloads||0), 0);
+    document.getElementById('adm-downloads').textContent = totalDl;
+    const uploadsList = document.getElementById('admin-uploads-list');
+    if (!resources.length) {
+      uploadsList.innerHTML = '<div class="empty-state"><div class="empty-icon">📤</div>No uploads yet.</div>';
+    } else {
+      uploadsList.innerHTML = resources.map(r => {
+        const tm = {'Notes':'📄','Past Paper':'📝','Assignment':'📋'}[r.type]||'📄';
+        const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PK') : 'Unknown';
+        return `<div class="admin-upload-row">
+          <div style="font-size:24px">${tm}</div>
+          <div class="admin-upload-info">
+            <div class="admin-upload-title">${r.title}</div>
+            <div class="admin-upload-meta">
+              <span>👤 ${r.uploaderName}</span>
+              <span>📧 ${r.uploaderEmail||''}</span>
+              <span>📚 ${r.subject}</span>
+              <span>🏷 ${r.type}</span>
+              <span>⬇ ${r.downloads} downloads</span>
+              <span>📅 ${date}</span>
+              ${r.filePath ? '<span style="color:var(--green)">PDF ✓</span>' : ''}
+            </div>
+          </div>
+          <button style="background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-weight:600;flex-shrink:0" onclick="confirmDel('resource','${r._id}','Delete &quot;${r.title}&quot;?')">🗑 Delete</button>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    document.getElementById('admin-uploads-list').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div>${e.message}</div>`;
+  }
+
+  try {
+    const folders = await api('GET', '/folders');
+    document.getElementById('adm-folders').textContent = folders.length;
+  } catch(e) {}
+}
 </script>
 </body>
 </html>
- 
