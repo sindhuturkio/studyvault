@@ -542,8 +542,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
     </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px" id="rm-meta"></div>
     <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:14px" id="rm-desc"></div>
-    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-      <button class="sub-btn" style="padding:10px 20px;font-size:13px;flex:1" id="dl-btn" onclick="downloadRes()">⬇ Download PDF</button>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <button class="sub-btn" style="padding:10px 20px;font-size:13px;flex:1" id="view-btn" onclick="viewPDFModal()">👁 View PDF</button>
+      <button class="sub-btn" style="padding:10px 20px;font-size:13px;flex:1;background:var(--accent2)" id="dl-btn" onclick="downloadRes()">⬇ Download</button>
       <button id="modal-del-btn" style="display:none;background:#e74c3c;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;font-weight:600" onclick="modalDeleteRes()">🗑 Delete</button>
     </div>
     <div class="sect-label">Rate this resource</div>
@@ -888,8 +889,9 @@ function renderGrid(id, resources) {
           <span>💬 ${r.comments?.length || 0}</span>
           ${r.filePath ? '<span style="color:var(--green)">PDF ✓</span>' : '<span style="color:var(--muted)">No PDF</span>'}
         </div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button class="dl-btn" onclick="event.stopPropagation();quickDl('${r._id}','${(r.title||'').replace(/'/g,"\\'")}')">Download</button>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          ${r.filePath ? `<button style="background:var(--green);color:#0d0f14;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" onclick="event.stopPropagation();viewPDF('${r._id}','${(r.title||'').replace(/'/g,"\\'")}')">👁 View</button>` : ''}
+          <button class="dl-btn" onclick="event.stopPropagation();quickDl('${r._id}','${(r.title||'').replace(/'/g,"\\'")}')">⬇ Download</button>
           ${(currentUser && (r.uploaderEmail === currentUser.email || isAdminUser())) ? `<button style="background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-weight:600" onclick="event.stopPropagation();adminDeleteRes('${r._id}','${(r.title||'').replace(/'/g,"\\\\'")}')" title="Delete resource">🗑 Delete</button>` : ''}
         </div>
       </div>
@@ -946,6 +948,29 @@ async function postComment() {
     renderComments(); loadResources();
     showToast('Comment posted!');
   } catch (e) { showToast(e.message, 'err'); }
+}
+
+// ─── VIEW PDF ───
+async function viewPDF(id, title) {
+  if (!currentUser) { showToast('Please log in to view.', 'err'); return; }
+  try {
+    const res = await fetch(API + `/api/resources/${id}/download`, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if (!res.ok) { const d = await res.json(); return showToast(d.message || 'View failed.', 'err'); }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    showToast('Opening "' + title + '" in new tab...');
+  } catch (e) { showToast('Could not open PDF: ' + e.message, 'err'); }
+}
+async function viewPDFModal() {
+  if (!activeRes) return;
+  await viewPDF(activeRes._id, activeRes.title);
+}
+async function viewFolderPDF(id, title) {
+  if (!currentUser) { showToast('Please log in to view.', 'err'); return; }
+  await viewPDF(id, title);
 }
 
 // ─── DOWNLOAD ───
@@ -1166,6 +1191,7 @@ async function loadFolderFiles(search) {
           </div>
         </div>
         <div class="file-actions">
+          ${f.filePath ? `<button class="abtn" style="background:var(--green);color:#0d0f14" onclick="viewFolderPDF('${f._id}','${f.title.replace(/'/g,"\\'")}')">👁 View</button>` : ''}
           <button class="abtn abtn-dl" onclick="downloadFolderFile('${f._id}','${f.title.replace(/'/g,"\\'")}')">⬇ Download</button>
           ${canDel ? `<button class="abtn abtn-del" onclick="confirmDel('file','${f._id}','Delete &quot;${f.title}&quot;? This cannot be undone.')">🗑 Delete</button>` : ''}
         </div>
