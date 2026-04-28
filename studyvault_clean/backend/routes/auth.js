@@ -128,5 +128,20 @@ router.get('/admin/users', protect, async (req, res) => {
     res.json(usersWithStatus);
   } catch (err) { console.error('Admin users error:', err); res.status(500).json({ message: 'Server error.' }); }
 });
-
+// RESET PASSWORD
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ message: 'Token and password required.' });
+    if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(400).json({ message: 'Invalid or expired reset link.' });
+    user.password = await bcrypt.hash(password, 12);
+    await user.save();
+    res.json({ message: 'Password reset successfully.' });
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid or expired reset link. Please request a new one.' });
+  }
+});
 module.exports = router;
