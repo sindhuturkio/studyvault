@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Resource = require('../models/Resource');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
@@ -10,21 +10,29 @@ const { notifyAdmin } = require('../services/emailService');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Cloudinary storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'studyvault',
+    resource_type: 'raw',
+    allowed_formats: ['pdf'],
+    public_id: (req, file) => Date.now() + '-' + Math.round(Math.random() * 1e9)
   }
 });
+
 const fileFilter = (req, file, cb) => {
   if (file.mimetype === 'application/pdf') cb(null, true);
   else cb(new Error('Only PDF files are allowed.'), false);
 };
+
 const upload = multer({ storage, fileFilter, limits: { fileSize: 20 * 1024 * 1024 } });
 
 // GET /api/resources
@@ -61,7 +69,7 @@ router.post('/upload', protect, upload.single('pdf'), async (req, res) => {
       uploaderName: req.user.name,
       uploaderEmail: req.user.email,
       fileName: req.file ? req.file.originalname : null,
-      filePath: req.file ? req.file.filename : null,
+      filePath: req.file ? req.file.path : null,
       fileSize: req.file ? req.file.size : null
     });
     await User.findByIdAndUpdate(req.user._id, {
@@ -87,8 +95,6 @@ router.get('/:id/download', protect, async (req, res) => {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ message: 'Resource not found.' });
     if (!resource.filePath) return res.status(404).json({ message: 'No PDF attached to this resource.' });
-    const filePath = path.join(__dirname, '../uploads', resource.filePath);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ message: 'File not found on server.' });
     resource.downloads += 1;
     await resource.save();
     await notifyAdmin('Resource Downloaded', {
@@ -98,29 +104,32 @@ router.get('/:id/download', protect, async (req, res) => {
       'Student Email': req.user.email,
       'Total Downloads': resource.downloads
     });
-    res.download(filePath, resource.fileName || 'resource.pdf');
+    // Redirect to Cloudinary URL
+    res.redirect(resource.filePath);
   } catch (err) {
     console.error('Download error:', err);
     res.status(500).json({ message: 'Server error.' });
   }
 });
 
-// DELETE /api/resources/:id — only uploader or admin can delete
+// DELETE /api/resources/:id
 router.delete('/:id', protect, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ message: 'Resource not found.' });
-
     const isOwner = resource.uploaderEmail === req.user.email;
     const isAdmin = req.user.email === ADMIN_EMAIL;
-
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: 'You can only delete files you uploaded.' });
     }
-
-    if (resource.filePath) {
-      const filePath = path.join(__dirname, '../uploads', resource.filePath);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    // Delete from Cloudinary if exists
+    if (resource.filePath && resource.filePath.includes('cloudinary')) {
+      try {
+        const urlParts = resource.filePath.split('/');
+        const publicIdWithExt = urlParts.slice(-2).join('/');
+        const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
+        await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+      } catch (e) { console.log('Cloudinary delete failed:', e.message); }
     }
     await resource.deleteOne();
     await notifyAdmin('Resource Deleted', {
